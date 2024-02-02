@@ -17,6 +17,6 @@ class SearchBox extends Component
     }
     public function render()
     {
-        return view('livewire.search-box');
+        return view('posts.partials.search-box');
     }
 }
