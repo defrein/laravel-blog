@@ -34,69 +34,74 @@ class PostResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Section::make('Main Content')->schema(
-                    [
-                        TextInput::make('title')
-                        ->live()
-                        ->required()->minLength(1)->maxLength(150)
-                        ->afterStateUpdated(function (string $operation, $state, Forms\Set $set){
-                            if($operation === 'edit') {
-                                return;
-                            }
-                            $set('slug', Str::slug($state));
-                        }),
-
-                        TextInput::make('slug')->required()->minLength(1)->maxLength(150)->unique(ignoreRecord: true),
-                        RichEditor::make('body')
+        return $form->schema([
+            Section::make('Main Content')
+                ->schema([
+                    // TextInput::make('title')
+                    // ->live()
+                    // ->required()->minLength(1)->maxLength(150)
+                    // ->afterStateUpdated(function (string $operation, $state, Forms\Set $set){
+                    //     if($operation === 'edit') {
+                    //         return;
+                    //     }
+                    //     $set('slug', Str::slug($state));
+                    // }),
+                    TextInput::make('title')
                         ->required()
-                        ->fileAttachmentsDirectory('posts/images')->columnSpanFull()
+                        ->minLength(1)
+                        ->maxLength(150),
 
-                    ]
-                )->columns(2),
-                Section::make('Meta')->schema(
-                    [
-                        FileUpload::make('image')->image()->directory('posts/thumbnails'),
-                        DateTimePicker::make('published_at')->nullable(),
-                        Checkbox::make('featured'),
-                        Select::make('user_id')
-                        ->relationship('author', 'name')
-                        ->searchable()
-                        ->required(),
-                        Select::make('categories')
-                        ->multiple()
-                        ->relationship('categories', 'title')
-                        ->searchable(),
-                    ]
-                ),
-            ]);
+                    // TextInput::make('slug')->required()->minLength(1)->maxLength(150)->unique(ignoreRecord: true),
+                    RichEditor::make('body')
+                        ->required()
+                        ->fileAttachmentsDirectory('posts/images')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
+            Section::make('Meta')->schema([
+                FileUpload::make('image')
+                    ->image()
+                    ->directory('posts/thumbnails'),
+                DateTimePicker::make('published_at')->nullable(),
+                Checkbox::make('featured'),
+                Select::make('user_id')
+                    ->relationship('author', 'name')
+                    ->searchable()
+                    ->required(),
+                Select::make('categories')
+                    ->multiple()
+                    ->relationship('categories', 'title')
+                    ->searchable(),
+            ]),
+        ]);
     }
+
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 ImageColumn::make('image'),
-                TextColumn::make('title')->sortable()->searchable(),
+                TextColumn::make('title')
+                    ->sortable()
+                    ->searchable(),
                 // TextColumn::make('slug')->sortable()->searchable(),
-                TextColumn::make('author.name')->sortable()->searchable(),
-                TextColumn::make('published_at')->date('Y-m-d')->sortable()->searchable(),
-                CheckboxColumn::make('featured')->sortable()->searchable()->disabled(),
+                TextColumn::make('author.name')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('published_at')
+                    ->date('Y-m-d')
+                    ->sortable()
+                    ->searchable(),
+                CheckboxColumn::make('featured')
+                    ->sortable()
+                    ->searchable()
+                    ->disabled(),
             ])
-            ->filters([
-                Tables\Filters\TrashedFilter::make(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
-                ]),
-            ]);
+            ->filters([Tables\Filters\TrashedFilter::make()])
+            ->actions([Tables\Actions\EditAction::make()])
+            ->bulkActions([Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make(), Tables\Actions\ForceDeleteBulkAction::make(), Tables\Actions\RestoreBulkAction::make()])]);
     }
 
     public static function getRelations(): array
@@ -117,9 +122,6 @@ class PostResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        return parent::getEloquentQuery()->withoutGlobalScopes([SoftDeletingScope::class]);
     }
 }

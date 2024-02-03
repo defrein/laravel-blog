@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CategoryResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CategoryResource\RelationManagers;
+use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 
 class CategoryResource extends Resource
@@ -24,22 +25,20 @@ class CategoryResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
+        return $form->schema([
+            Section::make('')->schema([
                 TextInput::make('title')
-                ->live()
-                ->required()->minLength(1)->maxLength(150)
-                ->afterStateUpdated(function (string $operation, $state, Forms\Set $set){
-                    if($operation === 'edit') {
-                        return;
-                    }
-                    $set('slug', Str::slug($state));
-                }),
+                    ->required()
+                    ->minLength(1)
+                    ->maxLength(150),
 
-                TextInput::make('slug')->required()->minLength(1)->maxLength(150)->unique(ignoreRecord: true),
+            ]),
+            Section::make('')->schema([
+                // TextInput::make('slug')->required()->minLength(1)->maxLength(150)->unique(ignoreRecord: true),
                 TextInput::make('text_color')->nullable(),
                 TextInput::make('bg_color')->nullable(),
-            ]);
+            ])
+        ]);
     }
 
     public static function table(Table $table): Table
